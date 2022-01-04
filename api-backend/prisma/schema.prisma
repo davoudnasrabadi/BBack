@@ -1,0 +1,246 @@
+//*******************\\ configurations //******************
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+//*******************\\ models //*******************
+
+model token {
+    token_id   Int       @id @default(autoincrement()) @db.UnsignedInt
+    token      String    @db.VarChar(1023)
+    created_at DateTime  @default(now())
+    expired_at DateTime?
+}
+
+model User {
+    user_id             Int                   @id @default(autoincrement()) @db.UnsignedInt
+    email               String?               @db.VarChar(255)
+    email_verified      Boolean?
+    phone               String?               @db.VarChar(32)
+    google_id           String?               @db.VarChar(30)
+    password            String?               @db.VarChar(255)
+    address             String?               @db.VarChar(255)
+    avatar              String?               @db.VarChar(255)
+    display_name        String?               @db.VarChar(255)
+    name                String?               @db.VarChar(255)
+    family              String?               @db.VarChar(255)
+    last_signin         DateTime?             @db.DateTime(0)
+    created_at          DateTime?             @default(now())
+    updated_at          DateTime?             @updatedAt
+    temp_token          String?
+    amount              Float?                @default(0)
+    verified            Boolean
+    project_id          Int
+    postalCode          Int?
+    city                String?
+    gender              String?
+    bday                Int?
+    bmonth              Int?
+    byear               Int?
+    country             String?
+    role                String?
+    pauseAllNotif       Boolean?
+    inGameNotif         Boolean?
+    emailNotif          Boolean?
+    smsNotif            Boolean?
+    totalPlayed         Int?
+    numberOfCups        Int?
+    totalCoins          Int?
+    countryPlacement    Int?
+    worldPlacement      Int?
+    numberOfWinds       Int?
+    totalEarnedFrames   Int?
+    shoppingCards       ShoppingCard[]
+    user_active_session user_active_session[]
+}
+
+model user_active_session {
+    jti               String          @id @db.VarChar(33)
+    expired_at        DateTime        @db.Timestamp
+    user              User?           @relation(fields: [user_id], references: [user_id])
+    user_id           Int?            @db.UnsignedInt
+    authorized_app_id Int?            @db.UnsignedInt
+    ip                String?         @db.VarChar(50)
+    created_at        DateTime?       @default(now())
+    updated_at        DateTime?       @updatedAt
+    session_device    session_device?
+}
+
+model ShoppingCard {
+    row_id       Int     @id @default(autoincrement()) @db.UnsignedInt
+    item_id      Int
+    name         String?
+    createdBy    String?
+    contract_add String?
+    token_id     Int?
+    pieces       Int?
+    price        Int?
+    User         User?   @relation(fields: [userUser_id], references: [user_id])
+    userUser_id  Int?    @db.UnsignedInt
+}
+
+model session_device {
+    device_id           Int                  @id @default(autoincrement()) @db.UnsignedInt
+    browser_name        String?              @db.VarChar(40)
+    browser_ver         String?              @db.VarChar(40)
+    device_model        String?              @db.VarChar(40)
+    device_type         String?              @db.VarChar(40)
+    device_vendor       String?              @db.VarChar(40)
+    os_name             String?              @db.VarChar(40)
+    os_ver              String?              @db.VarChar(40)
+    cpu                 String?              @db.VarChar(40)
+    user_active_session user_active_session? @relation(fields: [jti], references: [jti])
+    jti                 String               @unique @db.VarChar(33)
+}
+
+model otp {
+    otp_id     Int      @id @default(autoincrement()) @db.UnsignedInt
+    otp        String   @db.VarChar(40)
+    project_id Int?
+    type       Int
+    email      String   @unique @db.VarChar(100)
+    expire_at  DateTime @db.Timestamp(0)
+    verified   Boolean?
+}
+
+model Game {
+    game_id   Int        @id @default(autoincrement()) @db.UnsignedInt
+    game_name String     @db.VarChar(50)
+    type      GAME_TYPE?
+    time      DateTime?
+    img_path  String?
+    running   Boolean?
+    xdim      Int?
+    ydim      Int?
+    File      File[]
+}
+
+model Ticket {
+    ticket_id Int      @id @default(autoincrement()) @db.UnsignedInt
+    price     Int
+    plan      String
+    gameType  String
+    time      DateTime
+}
+
+model TicketUser {
+    row_id    Int      @id @default(autoincrement()) @db.UnsignedInt
+    user_id   Int
+    ticket_id Int
+    paid      Boolean?
+}
+
+model GameDate {
+    row_id Int      @id @default(autoincrement()) @db.UnsignedInt
+    type   String
+    time   DateTime
+}
+
+//********************************
+
+model Competitions {
+    user_id Int
+    game_id Int
+    wins    Boolean
+
+    @@unique([user_id, game_id], name: "usergame")
+}
+
+model Transactions {
+    trans_id   Int        @id @default(autoincrement()) @db.UnsignedInt
+    user_id    Int
+    trans_type Trans_Type
+    val        String?    @db.VarChar(32)
+    succ       Boolean
+}
+
+model Board {
+    row_id  Int @id @default(autoincrement()) @db.UnsignedInt
+    user_id Int
+    game_id Int
+    score   Int
+
+}
+
+model Puzzle {
+    user_id   Int
+    game_name String
+    x         Int
+    y         Int
+    isEdge    Boolean
+    x_loc     Int
+    y_loc     Int
+
+    @@unique([user_id, game_name, x, y], name: "puzzlerow")
+}
+
+model GameBoard {
+    id           Int     @id @default(autoincrement()) @db.UnsignedInt
+    name         String
+    market       String?
+    type         String?
+    file_name    String?
+    author       String?
+    contract_add String?
+    token_id     Int?
+    pieces       Int?
+    price        Int?
+    owner        Int?
+}
+
+model History {
+    row_id  Int      @id @default(autoincrement()) @db.UnsignedInt
+    user_id Int
+    date    DateTime @default(now())
+    amount  Float
+    variety String
+    status  String
+
+}
+
+model File {
+    file_id     Int     @id @default(autoincrement()) @db.UnsignedInt
+    game_id     Int     @db.UnsignedInt
+    name        String
+    mime        String?
+    size        Int?    @db.UnsignedInt
+    path        String
+    Game        Game?   @relation(fields: [gameGame_id], references: [game_id])
+    gameGame_id Int?    @db.UnsignedInt
+}
+
+model Contact {
+    msg_id     Int    @id @default(autoincrement()) @db.UnsignedInt
+    first_name String
+    last_name  String
+    email      String
+    msg        String
+}
+
+//***********************Enum types******************
+enum Trans_Type {
+    PAYMENT
+}
+
+enum Plans {
+    GOLD
+    SILVER
+    BRONZE
+}
+
+enum GAME_TYPE {
+    WEEK_FINAL
+    MONTH_FINAL
+    SUPER_CUP
+    CUP
+}
+
+enum OTP_TYPE {
+    SIGNUP
+    FORGOT
+}
